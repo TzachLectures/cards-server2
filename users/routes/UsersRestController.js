@@ -1,6 +1,5 @@
 const express = require("express");
 const { handleError } = require("../../utils/handleErrors");
-//const { generateUserPassword } = require("../helpers/bcrypt");
 const normalizeUser = require("../helpers/normalizeUser");
 const auth = require("../../auth/authService");
 const {
@@ -14,6 +13,7 @@ const {
 } = require("../models/usersAccessDataService");
 const {
   validateRegistration,
+  validateLogin,
 } = require("../validations/userValidationService");
 const { generateUserPassword } = require("../helpers/bcrypt");
 
@@ -38,6 +38,9 @@ router.post("/", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     let user = req.body;
+    const { error } = validateLogin(user);
+    if (error)
+      return handleError(res, 400, `Joi Error: ${error.details[0].message}`);
     const token = await loginUser(user);
     return res.send(token);
   } catch (error) {
